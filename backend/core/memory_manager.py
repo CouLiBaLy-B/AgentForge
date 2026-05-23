@@ -2,14 +2,15 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Any
+from agentforge.backend.core.config import settings
 
 class MemoryManager:
     """
     Manages long-term persistence for repo-specific conventions and agent memories.
     Uses local JSON files in the demo, but would use Postgres MemoryStore in production.
     """
-    def __init__(self, storage_dir: str = "agentforge/backend/memory"):
-        self.storage_dir = Path(storage_dir)
+    def __init__(self, storage_dir: str = None):
+        self.storage_dir = Path(storage_dir or settings.MEMORY_DIR)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_path(self, repo: str) -> Path:

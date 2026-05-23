@@ -6,13 +6,12 @@ from agentforge.backend.tools.slack_tools import slack_send_message
 from agentforge.backend.core.config import settings
 from agentforge.backend.core.memory_manager import memory_manager
 from agentforge.backend.core.logger import agent_logger
+from langchain_core.tools import tool
 
 def get_orchestrator(repo: str, task_id: str = "default"):
     repo_memory = memory_manager.get_repo_memory(repo)
     conventions_text = "\n".join([f"- {c}" for c in repo_memory.get("conventions", [])])
     
-    # Custom tool to bridge orchestrator and internal logger
-    from langchain_core.tools import tool
     @tool
     def log_task_event(event: str, details: str = ""):
         """Logs an important event for the current task."""
@@ -20,10 +19,10 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         return "Event logged."
 
     return create_deep_agent(
-        model="openai:deepseek-v4",
+        model=settings.MAIN_MODEL,
         model_kwargs={
             "base_url": settings.VLLM_BASE_URL,
-            "temperature": 0.1,
+            "temperature": settings.TEMPERATURE,
         },
         system_prompt=f"""You are AgentForge Orchestrator.
         
@@ -40,7 +39,7 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         """,
         sub_agents=[coder_agent, reviewer_agent, pr_agent],
         tools=[create_pull_request, kanban_update_status, slack_send_message, log_task_event],
-        skills_dir="./skills/orchestrator/",
-        memory=[f"agentforge/backend/memory/{repo.replace('/', '_')}.md"],
+        skills_dir=f"{settings.SKILLS_DIR}/orchestrator/",
+        memory=[f"{settings.MEMORY_DIR}/{repo.replace('/', '_')}.md"],
         interrupt_on=["create_pull_request"],
     )

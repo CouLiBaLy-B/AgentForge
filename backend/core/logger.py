@@ -2,10 +2,11 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
+from agentforge.backend.core.config import settings
 
 class AgentLogger:
-    def __init__(self, logs_dir: str = "agentforge/workspace/logs"):
-        self.logs_dir = Path(logs_dir)
+    def __init__(self, logs_dir: str = None):
+        self.logs_dir = Path(logs_dir or settings.LOGS_DIR)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_log_path(self, task_id: str) -> Path:
