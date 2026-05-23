@@ -1,0 +1,9 @@
+{
+  "conventions": [
+    "Use FastAPI for all new endpoints.",
+    "All endpoints must return JSON.",
+    "Project uses Pydantic for response models."
+  ],
+  "past_issues": [],
+  "learned_skills": []
+}

@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  agentforge-api:
+    build:
+      context: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - VLLM_BASE_URL=http://vllm:8000/v1
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+    volumes:
+      - ./skills:/app/skills
+      - ./workspace:/app/workspace
+      - ./backend/memory:/app/memory
+    depends_on:
+      - vllm
+      - redis
+
+  agentforge-ui:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - agentforge-api
+
+  vllm:
+    image: vllm/vllm-openai:v0.20.2
+    command: >
+      --model deepseek-ai/DeepSeek-V4
+      --dtype fp8
+      --max-model-len 32768
+      --enable-prefix-caching
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8000:8000"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
