@@ -1,4 +1,12 @@
 from deepagents import create_deep_agent
+from deepagents.middleware import (
+    SubAgentMiddleware,
+    FilesystemMiddleware,
+    TodoListMiddleware,
+    SummarizationMiddleware,
+    SkillsMiddleware,
+    MemoryMiddleware
+)
 from agentforge.backend.agents.sub_agents import coder_agent, reviewer_agent, pr_agent
 from agentforge.backend.tools.github_tools import create_pull_request
 from agentforge.backend.tools.kanban_tools import kanban_update_status
@@ -18,6 +26,16 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         agent_logger.log_event(task_id, "orchestrator", event, details)
         return "Event logged."
 
+    # Define the middleware stack explicitly
+    middleware = [
+        TodoListMiddleware(),  # Handles planning with write_todos
+        FilesystemMiddleware(root_dir=settings.WORKSPACE_DIR), # Safe file access
+        SkillsMiddleware(skills_dir=settings.SKILLS_DIR), # Progressive disclosure
+        SubAgentMiddleware(), # Orchestrates coder/reviewer/pr agents
+        SummarizationMiddleware(token_limit=32000), # Auto-summarize long contexts
+        MemoryMiddleware() # Handles AGENTS.md and memory injection
+    ]
+
     return create_deep_agent(
         model=settings.MAIN_MODEL,
         model_kwargs={
@@ -28,18 +46,14 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         
         REPO CONTEXT: {conventions_text}
         
-        LOGGING:
-        Use `log_task_event` to record major milestones (e.g., 'Coder started', 'Review completed').
-        
-        Workflow:
-        1. PLAN: `write_todos`.
-        2. LOG: Start of task.
-        3. DELEGATE: Coder -> Reviewer -> PR Agent.
-        4. LOG: Final result.
+        WORKFLOW:
+        1. PLAN: You MUST use `write_todos` to create a plan before starting.
+        2. LOG: Record milestones via `log_task_event`.
+        3. DELEGATE: Use the `task` tool to call specialized sub-agents.
+        4. APPROVAL: Wait for HITL before `create_pull_request`.
         """,
         sub_agents=[coder_agent, reviewer_agent, pr_agent],
         tools=[create_pull_request, kanban_update_status, slack_send_message, log_task_event],
-        skills_dir=f"{settings.SKILLS_DIR}/orchestrator/",
-        memory=[f"{settings.MEMORY_DIR}/{repo.replace('/', '_')}.md"],
+        middleware=middleware, # Explicitly passing the middleware stack
         interrupt_on=["create_pull_request"],
     )
