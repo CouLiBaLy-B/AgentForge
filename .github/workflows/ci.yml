@@ -20,9 +20,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ruff pytest httpx fastapi pydantic-settings requests unittest-xml-reporting
-        # Mocking deepagents for CI
-        pip install unittest.mock 
+        pip install ruff pytest httpx fastapi pydantic-settings requests python-dotenv
+        # Note: unittest.mock is built-in for Python 3.12, no need to pip install it.
         
     - name: Lint with ruff
       run: ruff check backend/
