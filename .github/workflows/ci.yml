@@ -1,0 +1,52 @@
+name: AgentForge CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest httpx fastapi pydantic-settings requests unittest-xml-reporting
+        # Mocking deepagents for CI
+        pip install unittest.mock 
+        
+    - name: Lint with ruff
+      run: ruff check backend/
+      continue-on-error: true
+
+    - name: Run Backend Tests
+      run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        pytest backend/tests/
+      env:
+        VLLM_BASE_URL: "http://localhost:8000/v1"
+        GITHUB_TOKEN: "mock_token"
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Backend Image
+      run: docker build -t agentforge-backend:latest ./backend
+      
+    - name: Build Sandbox Image
+      run: docker build -f ./backend/Dockerfile.sandbox -t agentforge-sandbox:latest ./backend
+
+    - name: Build Frontend Image
+      run: docker build -t agentforge-frontend:latest ./frontend
