@@ -23,12 +23,11 @@ jobs:
         pip install ruff pytest httpx fastapi pydantic-settings requests python-dotenv deepagents
         
     - name: Lint with ruff
-      run: ruff check .
-      continue-on-error: true
+      run: ruff check . --fix
+      continue-on-error: true # Do not block tests for linting
 
     - name: Run Backend Tests
       run: |
-        # On ajoute la racine au PYTHONPATH pour que 'import backend...' fonctionne
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest backend/tests/
       env:
