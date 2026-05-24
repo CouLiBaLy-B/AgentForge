@@ -4,7 +4,8 @@ from backend.tools.github_tools import github_clone_repo
 from backend.core.memory_manager import MemoryManager
 
 def test_memory_manager_conventions():
-    mm = MemoryManager(storage_dir="agentforge/backend/tests/memory_tmp")
+    # Use a local path that exists in the CI environment
+    mm = MemoryManager(storage_dir="./backend/tests/memory_tmp")
     repo = "test/repo"
     mm.add_convention(repo, "Standard indent: 4 spaces")
     
@@ -13,9 +14,11 @@ def test_memory_manager_conventions():
     
     # Cleanup
     import shutil
-    shutil.rmtree("agentforge/backend/tests/memory_tmp")
+    import os
+    if os.path.exists("./backend/tests/memory_tmp"):
+        shutil.rmtree("./backend/tests/memory_tmp")
 
-@patch("agentforge.backend.core.sandbox.sandbox.execute")
+@patch("backend.core.sandbox.sandbox.execute")
 def test_github_clone_tool(mock_execute):
     mock_execute.return_value = (0, "Cloned", "")
     res = github_clone_repo.invoke({"repo": "org/repo", "branch": "main"})
