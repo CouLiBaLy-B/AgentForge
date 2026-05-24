@@ -1,5 +1,6 @@
-import pytest
-from unittest.mock import patch, MagicMock
+import os
+import shutil
+from unittest.mock import patch
 from backend.tools.github_tools import github_clone_repo
 from backend.core.memory_manager import MemoryManager
 
@@ -13,8 +14,6 @@ def test_memory_manager_conventions():
     assert "Standard indent: 4 spaces" in mem["conventions"]
     
     # Cleanup
-    import shutil
-    import os
     if os.path.exists("./backend/tests/memory_tmp"):
         shutil.rmtree("./backend/tests/memory_tmp")
 

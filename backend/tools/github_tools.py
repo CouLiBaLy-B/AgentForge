@@ -1,4 +1,3 @@
-import os
 import requests
 from langchain_core.tools import tool
 from backend.core.sandbox import sandbox

@@ -17,8 +17,10 @@ class MockBaseSettings:
     model_config = {"env_file": ".env"}
 sys.modules["pydantic_settings"].BaseSettings = MockBaseSettings
 
-from backend.agents.orchestrator import get_orchestrator
-from backend.core.memory_manager import memory_manager
+# Moved imports to the top as much as possible, but since we mock sys.modules above, 
+# we keep them here but fix the ruff warning if possible or just ignore it for the test script.
+from backend.agents.orchestrator import get_orchestrator # noqa: E402
+from backend.core.memory_manager import memory_manager # noqa: E402
 
 async def simulate_end_to_end():
     print("🚀 Starting End-to-End Simulation")
@@ -30,7 +32,7 @@ async def simulate_end_to_end():
     # 2. Get Orchestrator
     orchestrator = get_orchestrator(repo)
     print(f"🤖 Orchestrator initialized for {repo}")
-    print(f"Plan created: {orchestrator}") # Using variable
+    print(f"Plan created: {orchestrator}")
 
     print("\n✅ Simulation Complete!")
 
