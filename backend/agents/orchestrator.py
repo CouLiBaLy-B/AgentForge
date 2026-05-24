@@ -2,7 +2,6 @@ from deepagents import create_deep_agent
 from deepagents.middleware import (
     SubAgentMiddleware,
     FilesystemMiddleware,
-    TodoListMiddleware,
     SummarizationMiddleware,
     SkillsMiddleware,
     MemoryMiddleware
@@ -29,8 +28,8 @@ def get_orchestrator(repo: str, task_id: str = "default"):
     base_url = settings.VLLM_BASE_URL if settings.LLM_SOURCE == "vllm" else settings.FREELLM_BASE_URL
     api_key = "no-key" if settings.LLM_SOURCE == "vllm" else settings.FREELLM_API_KEY
 
+    # TodoListMiddleware removed as it is not present in the current deepagents version
     middleware = [
-        TodoListMiddleware(),
         FilesystemMiddleware(root_dir=settings.WORKSPACE_DIR),
         SkillsMiddleware(skills_dir=settings.SKILLS_DIR),
         SubAgentMiddleware(),
@@ -50,10 +49,10 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         REPO CONTEXT: {conventions_text}
         
         WORKFLOW:
-        1. PLAN: Use `write_todos`.
-        2. LOG: Start of task.
-        3. DELEGATE: Coder -> Reviewer -> PR Agent.
-        4. APPROVAL: Wait for HITL.
+        1. PLAN: Organize your thoughts before starting.
+        2. LOG: Start of task via log_task_event.
+        3. DELEGATE: Use sub-agents (coder, reviewer, pr_creator) for specialized work.
+        4. APPROVAL: Wait for human approval before final PR creation.
         """,
         sub_agents=[coder_agent, reviewer_agent, pr_agent],
         tools=[create_pull_request, kanban_update_status, slack_send_message, log_task_event],
