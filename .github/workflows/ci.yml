@@ -20,15 +20,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ruff pytest httpx fastapi pydantic-settings requests python-dotenv
-        # Note: unittest.mock is built-in for Python 3.12, no need to pip install it.
+        pip install ruff pytest httpx fastapi pydantic-settings requests python-dotenv deepagents
         
     - name: Lint with ruff
-      run: ruff check backend/
+      run: ruff check .
       continue-on-error: true
 
     - name: Run Backend Tests
       run: |
+        # On ajoute la racine au PYTHONPATH pour que 'import backend...' fonctionne
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest backend/tests/
       env:
@@ -46,6 +46,3 @@ jobs:
       
     - name: Build Sandbox Image
       run: docker build -f ./backend/Dockerfile.sandbox -t agentforge-sandbox:latest ./backend
-
-    - name: Build Frontend Image
-      run: docker build -t agentforge-frontend:latest ./frontend

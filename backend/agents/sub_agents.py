@@ -1,6 +1,6 @@
-from agentforge.backend.tools.github_tools import github_clone_repo, execute_command
-from agentforge.backend.tools.reviewer_tools import security_scan_python, analyze_complexity
-from agentforge.backend.core.config import settings
+from backend.tools.github_tools import github_clone_repo, execute_command
+from backend.tools.reviewer_tools import security_scan_python, analyze_complexity
+from backend.core.config import settings
 
 coder_agent = {
     "name": "coder",

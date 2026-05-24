@@ -1,6 +1,6 @@
 import requests
 from langchain_core.tools import tool
-from agentforge.backend.core.config import settings
+from backend.core.config import settings
 
 @tool
 def kanban_update_status(task_id: str, status: str, message: str = "") -> str:

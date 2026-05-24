@@ -2,7 +2,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Any
-from agentforge.backend.core.config import settings
+from backend.core.config import settings
 
 class MemoryManager:
     """

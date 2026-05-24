@@ -7,13 +7,13 @@ from deepagents.middleware import (
     SkillsMiddleware,
     MemoryMiddleware
 )
-from agentforge.backend.agents.sub_agents import coder_agent, reviewer_agent, pr_agent
-from agentforge.backend.tools.github_tools import create_pull_request
-from agentforge.backend.tools.kanban_tools import kanban_update_status
-from agentforge.backend.tools.slack_tools import slack_send_message
-from agentforge.backend.core.config import settings
-from agentforge.backend.core.memory_manager import memory_manager
-from agentforge.backend.core.logger import agent_logger
+from backend.agents.sub_agents import coder_agent, reviewer_agent, pr_agent
+from backend.tools.github_tools import create_pull_request
+from backend.tools.kanban_tools import kanban_update_status
+from backend.tools.slack_tools import slack_send_message
+from backend.core.config import settings
+from backend.core.memory_manager import memory_manager
+from backend.core.logger import agent_logger
 from langchain_core.tools import tool
 
 def get_orchestrator(repo: str, task_id: str = "default"):

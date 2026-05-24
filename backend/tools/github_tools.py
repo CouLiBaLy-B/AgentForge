@@ -1,6 +1,6 @@
 import os
 from langchain_core.tools import tool
-from agentforge.backend.core.sandbox import sandbox
+from backend.core.sandbox import sandbox
 
 @tool
 def execute_command(command: str, workdir: str = "/workspace") -> str:
@@ -16,7 +16,7 @@ def execute_command(command: str, workdir: str = "/workspace") -> str:
 @tool
 def github_clone_repo(repo: str, branch: str = "main") -> str:
     """Clone a GitHub repo into the sandbox workspace."""
-    from agentforge.backend.core.config import settings
+    from backend.core.config import settings
     
     repo_name = repo.split('/')[-1]
     url = f"https://x-access-token:{settings.GITHUB_TOKEN}@github.com/{repo}.git"

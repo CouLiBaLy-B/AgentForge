@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from agentforge.backend.main import app
+from backend.main import app
 from unittest.mock import patch, MagicMock
 
 client = TestClient(app)

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from agentforge.backend.tools.github_tools import github_clone_repo
-from agentforge.backend.core.memory_manager import MemoryManager
+from backend.tools.github_tools import github_clone_repo
+from backend.core.memory_manager import MemoryManager
 
 def test_memory_manager_conventions():
     mm = MemoryManager(storage_dir="agentforge/backend/tests/memory_tmp")
