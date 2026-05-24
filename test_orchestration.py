@@ -17,8 +17,8 @@ class MockBaseSettings:
     class Config: env_file = ".env"
 sys.modules["pydantic_settings"].BaseSettings = MockBaseSettings
 
-from agentforge.backend.agents.orchestrator import get_orchestrator
-from agentforge.backend.core.memory_manager import memory_manager
+from backend.agents.orchestrator import get_orchestrator
+from backend.core.memory_manager import memory_manager
 
 async def simulate_end_to_end():
     print("🚀 Starting End-to-End Simulation: 'Add Health Check to API'")

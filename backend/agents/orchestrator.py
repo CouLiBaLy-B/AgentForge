@@ -26,20 +26,23 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         agent_logger.log_event(task_id, "orchestrator", event, details)
         return "Event logged."
 
-    # Define the middleware stack explicitly
+    base_url = settings.VLLM_BASE_URL if settings.LLM_SOURCE == "vllm" else settings.FREELLM_BASE_URL
+    api_key = "no-key" if settings.LLM_SOURCE == "vllm" else settings.FREELLM_API_KEY
+
     middleware = [
-        TodoListMiddleware(),  # Handles planning with write_todos
-        FilesystemMiddleware(root_dir=settings.WORKSPACE_DIR), # Safe file access
-        SkillsMiddleware(skills_dir=settings.SKILLS_DIR), # Progressive disclosure
-        SubAgentMiddleware(), # Orchestrates coder/reviewer/pr agents
-        SummarizationMiddleware(token_limit=32000), # Auto-summarize long contexts
-        MemoryMiddleware() # Handles AGENTS.md and memory injection
+        TodoListMiddleware(),
+        FilesystemMiddleware(root_dir=settings.WORKSPACE_DIR),
+        SkillsMiddleware(skills_dir=settings.SKILLS_DIR),
+        SubAgentMiddleware(),
+        SummarizationMiddleware(token_limit=32000),
+        MemoryMiddleware()
     ]
 
     return create_deep_agent(
         model=settings.MAIN_MODEL,
         model_kwargs={
-            "base_url": settings.VLLM_BASE_URL,
+            "base_url": base_url,
+            "api_key": api_key,
             "temperature": settings.TEMPERATURE,
         },
         system_prompt=f"""You are AgentForge Orchestrator.
@@ -47,13 +50,13 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         REPO CONTEXT: {conventions_text}
         
         WORKFLOW:
-        1. PLAN: You MUST use `write_todos` to create a plan before starting.
-        2. LOG: Record milestones via `log_task_event`.
-        3. DELEGATE: Use the `task` tool to call specialized sub-agents.
-        4. APPROVAL: Wait for HITL before `create_pull_request`.
+        1. PLAN: Use `write_todos`.
+        2. LOG: Start of task.
+        3. DELEGATE: Coder -> Reviewer -> PR Agent.
+        4. APPROVAL: Wait for HITL.
         """,
         sub_agents=[coder_agent, reviewer_agent, pr_agent],
         tools=[create_pull_request, kanban_update_status, slack_send_message, log_task_event],
-        middleware=middleware, # Explicitly passing the middleware stack
+        middleware=middleware,
         interrupt_on=["create_pull_request"],
     )
