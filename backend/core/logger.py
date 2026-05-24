@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from backend.core.config import settings
+from agentforge.backend.core.config import settings
 
 class AgentLogger:
     def __init__(self, logs_dir: str = None):

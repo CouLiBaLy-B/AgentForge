@@ -7,10 +7,10 @@ from typing import Optional, List
 import uuid
 from datetime import datetime
 
-from backend.agents.orchestrator import get_orchestrator
-from backend.core.config import settings
-from backend.core.security import verify_slack_signature
-from backend.core.logger import agent_logger
+from agentforge.backend.agents.orchestrator import get_orchestrator
+from agentforge.backend.core.config import settings
+from agentforge.backend.core.security import verify_slack_signature
+from agentforge.backend.core.logger import agent_logger
 
 app = FastAPI(title="AgentForge API")
 

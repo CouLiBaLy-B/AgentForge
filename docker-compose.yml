@@ -11,6 +11,7 @@ services:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      - CLAUDE_CODE_ENABLED=true
     volumes:
       - ./skills:/app/skills
       - ./workspace:/app/workspace
@@ -27,6 +28,22 @@ services:
     depends_on:
       - agentforge-api
 
+  # New specialized service for Claude Code CLI
+  claude-coder:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.claude
+    environment:
+      - ANTHROPIC_BASE_URL=http://vllm:8000
+      - ANTHROPIC_AUTH_TOKEN=dummy
+      - CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+      - ANTHROPIC_DEFAULT_SONNET_MODEL=qwen-2.5-coder-32b
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    volumes:
+      - ./workspace:/workspace
+    depends_on:
+      - vllm
+
   vllm:
     image: vllm/vllm-openai:v0.20.2
     command: >
@@ -34,6 +51,8 @@ services:
       --dtype fp8
       --max-model-len 32768
       --enable-prefix-caching
+      --enable-auto-tool-choice
+      --tool-call-parser openai
     deploy:
       resources:
         reservations:
@@ -48,3 +67,13 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  freellm:
+    image: tashfeenahmed/freellmapi:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./freellm_data:/app/data

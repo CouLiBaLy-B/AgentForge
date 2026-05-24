@@ -2,7 +2,7 @@ import hmac
 import hashlib
 import time
 from fastapi import Request, HTTPException
-from backend.core.config import settings
+from agentforge.backend.core.config import settings
 
 async def verify_slack_signature(request: Request):
     timestamp = request.headers.get("X-Slack-Request-Timestamp")

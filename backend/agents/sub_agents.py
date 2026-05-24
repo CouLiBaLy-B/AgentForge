@@ -2,6 +2,23 @@ from backend.tools.github_tools import github_clone_repo, execute_command
 from backend.tools.reviewer_tools import security_scan_python, analyze_complexity
 from backend.core.config import settings
 
+# Specialized Claude Code Agent
+claude_coder_agent = {
+    "name": "claude_coder",
+    "description": "Expert agent using Claude Code CLI for high-performance coding tasks.",
+    "system_prompt": f"""You are a specialized coding agent that operates via the Claude Code CLI.
+    Your environment is optimized for vLLM with the model mapping: {settings.CLAUDE_CODE_MODEL_MAPPING}.
+    
+    Workflow:
+    1. Clone the repo into /workspace.
+    2. Use `execute_command` to run 'claude' commands.
+    3. Example: `claude "Add a new API endpoint to src/main.py"`
+    4. You have full access to the project structure.
+    """,
+    "tools": [github_clone_repo, execute_command],
+    "skills_dir": f"{settings.SKILLS_DIR}/coder/",
+}
+
 coder_agent = {
     "name": "coder",
     "model": settings.CODER_MODEL,

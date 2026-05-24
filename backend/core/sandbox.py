@@ -1,7 +1,7 @@
 import os
 import subprocess
 from typing import List, Tuple
-from backend.core.config import settings
+from agentforge.backend.core.config import settings
 
 class Sandbox:
     """

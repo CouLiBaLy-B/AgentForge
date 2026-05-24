@@ -1,0 +1,30 @@
+# Dockerfile.claude
+FROM node:20-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create workspace and configuration directories
+WORKDIR /workspace
+RUN mkdir -p /root/.claude
+
+# Default environment variables for vLLM compatibility
+ENV ANTHROPIC_BASE_URL="http://vllm:8000"
+ENV ANTHROPIC_AUTH_TOKEN="dummy"
+ENV CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"
+ENV ANTHROPIC_DEFAULT_SONNET_MODEL="qwen-2.5-coder-32b"
+
+# Expose potential ports if Claude Code needs them for any UI or proxy
+EXPOSE 3002
+
+# The entrypoint will keep the container alive or run specific tasks
+CMD ["tail", "-f", "/dev/null"]

@@ -6,7 +6,7 @@ from deepagents.middleware import (
     SkillsMiddleware,
     MemoryMiddleware
 )
-from backend.agents.sub_agents import coder_agent, reviewer_agent, pr_agent
+from backend.agents.sub_agents import coder_agent, reviewer_agent, pr_agent, claude_coder_agent
 from backend.tools.github_tools import create_pull_request
 from backend.tools.kanban_tools import kanban_update_status
 from backend.tools.slack_tools import slack_send_message
@@ -28,7 +28,6 @@ def get_orchestrator(repo: str, task_id: str = "default"):
     base_url = settings.VLLM_BASE_URL if settings.LLM_SOURCE == "vllm" else settings.FREELLM_BASE_URL
     api_key = "no-key" if settings.LLM_SOURCE == "vllm" else settings.FREELLM_API_KEY
 
-    # TodoListMiddleware removed as it is not present in the current deepagents version
     middleware = [
         FilesystemMiddleware(root_dir=settings.WORKSPACE_DIR),
         SkillsMiddleware(skills_dir=settings.SKILLS_DIR),
@@ -36,6 +35,11 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         SummarizationMiddleware(token_limit=32000),
         MemoryMiddleware()
     ]
+
+    # Combine regular agents with Claude Coder if enabled
+    available_sub_agents = [coder_agent, reviewer_agent, pr_agent]
+    if settings.CLAUDE_CODE_ENABLED:
+        available_sub_agents.append(claude_coder_agent)
 
     return create_deep_agent(
         model=settings.MAIN_MODEL,
@@ -49,12 +53,15 @@ def get_orchestrator(repo: str, task_id: str = "default"):
         REPO CONTEXT: {conventions_text}
         
         WORKFLOW:
-        1. PLAN: Organize your thoughts before starting.
-        2. LOG: Start of task via log_task_event.
-        3. DELEGATE: Use sub-agents (coder, reviewer, pr_creator) for specialized work.
-        4. APPROVAL: Wait for human approval before final PR creation.
+        1. PLAN: Use `write_todos` logic internally to organize your thoughts.
+        2. LOG: Start of task.
+        3. DELEGATE: 
+           - Use 'claude_coder' for complex implementation tasks (high performance).
+           - Use 'coder' for standard dev work.
+           - Use 'reviewer' for quality checks.
+        4. APPROVAL: Wait for HITL.
         """,
-        sub_agents=[coder_agent, reviewer_agent, pr_agent],
+        sub_agents=available_sub_agents,
         tools=[create_pull_request, kanban_update_status, slack_send_message, log_task_event],
         middleware=middleware,
         interrupt_on=["create_pull_request"],

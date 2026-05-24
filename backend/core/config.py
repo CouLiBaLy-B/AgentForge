@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     FREELLM_BASE_URL: str = os.getenv("FREELLM_BASE_URL", "http://freellm:3001/v1")
     FREELLM_API_KEY: str = os.getenv("FREELLM_API_KEY", "")
     
+    # Claude Code Specific
+    CLAUDE_CODE_ENABLED: bool = os.getenv("CLAUDE_CODE_ENABLED", "true").lower() == "true"
+    CLAUDE_CODE_MODEL_MAPPING: str = os.getenv("CLAUDE_CODE_MODEL_MAPPING", "qwen-2.5-coder-32b")
+    
     # Model Configuration
     MAIN_MODEL: str = os.getenv("MAIN_MODEL", "openai:deepseek-v4")
     CODER_MODEL: str = os.getenv("CODER_MODEL", "openai:deepseek-v4")

@@ -1,6 +1,6 @@
 import requests
 from langchain_core.tools import tool
-from backend.core.config import settings
+from agentforge.backend.core.config import settings
 
 @tool
 def slack_send_message(channel: str, text: str, thread_ts: str = None) -> str:
